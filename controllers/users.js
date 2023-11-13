@@ -1,6 +1,15 @@
 import User from "../models/User.js";
 
 /* READ */
+export const getUsers = async (req, res) => {
+  try {
+    const user = await User.find();
+    res.status(200).json(user);
+  } catch (err) {
+    res.status(404).json({ message: err.message });
+  }
+};
+
 export const getUser = async (req, res) => {
   try {
     const { id } = req.params;
@@ -20,8 +29,24 @@ export const getUserFriends = async (req, res) => {
       user.friends.map((id) => User.findById(id))
     );
     const formattedFriends = friends.map(
-      ({ _id, firstName, lastName, occupation, location, picturePath }) => {
-        return { _id, firstName, lastName, occupation, location, picturePath };
+      ({
+        _id,
+        firstName,
+        lastName,
+        occupation,
+        location,
+        picturePath,
+        role,
+      }) => {
+        return {
+          _id,
+          firstName,
+          lastName,
+          occupation,
+          location,
+          picturePath,
+          role,
+        };
       }
     );
     res.status(200).json(formattedFriends);
@@ -31,6 +56,30 @@ export const getUserFriends = async (req, res) => {
 };
 
 /* UPDATE */
+export const userRating = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { rating } = req.body;
+
+    // Assuming User is the model you are using
+    const user = await User.findByIdAndUpdate(
+      id,
+      { $set: { rating } },
+      { new: true }
+    );
+
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    console.log(`Rating updated for user ${id} to ${rating}`);
+    res.status(200).json(user);
+  } catch (err) {
+    console.error("Error updating rating:", err.message);
+    res.status(500).json({ message: "Internal Server Error" });
+  }
+};
+
 export const addRemoveFriend = async (req, res) => {
   try {
     const { id, friendId } = req.params;

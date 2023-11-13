@@ -4,7 +4,7 @@ import User from "../models/User.js";
 /* CREATE */
 export const createPost = async (req, res) => {
   try {
-    const { userId, description, picturePath } = req.body;
+    const { userId, description, picturePath, price, category } = req.body;
     const user = await User.findById(userId);
     const newPost = new Post({
       userId,
@@ -14,6 +14,8 @@ export const createPost = async (req, res) => {
       description,
       userPicturePath: user.picturePath,
       picturePath,
+      price,
+      category,
       likes: {},
       comments: [],
     });
@@ -45,6 +47,18 @@ export const getUserPosts = async (req, res) => {
     res.status(404).json({ message: err.message });
   }
 };
+
+/* DELETE */
+export const deletePost = async (req, res) => {
+  try {
+    const { id } = req.params;
+    await Post.findByIdAndRemove(id);
+    res.status(200).json({ message: "Post deleted successfully." });
+  } catch (err) {
+    res.status(404).json({ message: err.message });
+  }
+};
+
 
 /* UPDATE */
 export const likePost = async (req, res) => {

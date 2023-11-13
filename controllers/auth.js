@@ -14,6 +14,8 @@ export const register = async (req, res) => {
       friends,
       location,
       occupation,
+      role,
+      rating,
     } = req.body;
 
     const salt = await bcrypt.genSalt();
@@ -30,6 +32,8 @@ export const register = async (req, res) => {
       occupation,
       viewedProfile: Math.floor(Math.random() * 10000),
       impressions: Math.floor(Math.random() * 10000),
+      role, 
+      rating,
     });
     const savedUser = await newUser.save();
     res.status(201).json(savedUser);
