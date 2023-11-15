@@ -4,7 +4,8 @@ import User from "../models/User.js";
 /* CREATE */
 export const createPost = async (req, res) => {
   try {
-    const { userId, description, picturePath, price, category } = req.body;
+    const { userId, description, picturePath, price, category, level } =
+      req.body;
     const user = await User.findById(userId);
     const newPost = new Post({
       userId,
@@ -18,6 +19,7 @@ export const createPost = async (req, res) => {
       category,
       likes: {},
       comments: [],
+      level,
     });
     await newPost.save();
 
@@ -31,6 +33,15 @@ export const createPost = async (req, res) => {
 /* READ */
 export const getFeedPosts = async (req, res) => {
   try {
+    const post = await Post.find().sort({ level: -1 });
+    res.status(200).json(post);
+  } catch (err) {
+    res.status(404).json({ message: err.message });
+  }
+};
+
+export const getPosts = async (req, res) => {
+  try {
     const post = await Post.find();
     res.status(200).json(post);
   } catch (err) {
@@ -41,7 +52,7 @@ export const getFeedPosts = async (req, res) => {
 export const getUserPosts = async (req, res) => {
   try {
     const { userId } = req.params;
-    const post = await Post.find({ userId });
+    const post = await Post.find({ userId }).sort({ level: -1 });
     res.status(200).json(post);
   } catch (err) {
     res.status(404).json({ message: err.message });
@@ -59,6 +70,43 @@ export const deletePost = async (req, res) => {
   }
 };
 
+/* UPDATE */
+export const setLevel = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const post = await Post.findById(id);
+    const { level } = req.body;
+    const updatedPost = await Post.findByIdAndUpdate(
+      id,
+      { level: level},
+      { new: true }
+    );
+    res.status(200).json(updatedPost);
+  } catch (error) {
+    res.status(404).json({ message: err.message });
+  }
+};
+
+export const updatePost = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { description, picturePath, price, category } = req.body;
+    const post = await Post.findById(id);
+    const updatedPost = await Post.findByIdAndUpdate(
+      id,
+      {
+        description: description ? description : post.description,
+        picturePath: picturePath ? picturePath : post.picturePath,
+        price: price ? price : post.price,
+        category: category ? category : post.category,
+      },
+      { new: true }
+    );
+    res.status(200).json(updatedPost);
+  } catch (err) {
+    res.status(404).json({ message: err.message });
+  }
+};
 
 /* UPDATE */
 export const likePost = async (req, res) => {
